@@ -1,2 +1,2 @@
-pyrow>=0.3.0
-pyusb>=1.2.1
+pyusb>=1.0.0
+git+https://github.com/droogmic/Py3Row.git
