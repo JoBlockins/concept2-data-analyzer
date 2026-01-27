@@ -10,7 +10,8 @@ from pm5_connection import PM5Connection
 from pm5_simulator import PM5Simulator
 from data_recorder import DataRecorder
 from data_analyzer import DataAnalyzer
-
+from data_visualizer import DataVisualizer
+from web_stroke_display import WebStrokeDisplay
 
 class WorkoutMonitor:
     def __init__(self, pm5):
@@ -21,6 +22,15 @@ class WorkoutMonitor:
         self.command = None
         self.recent_stroke_lengths = []  # Track last 5 strokes
         self.last_stroke_count = 0
+        # Try to create live display (may fail on some systems)
+        try:
+            self.live_display = WebStrokeDisplay(port=5000)
+            self.has_display = True
+        except Exception as e:
+            print(f"⚠️  Could not create live display: {e}")
+            print("Continuing without live display window...")
+            self.live_display = None
+            self.has_display = False
     
     def input_thread(self):
         """Separate thread to handle user input"""
@@ -37,6 +47,14 @@ class WorkoutMonitor:
         input_handler = threading.Thread(target=self.input_thread, daemon=True)
         input_handler.start()
         
+        # Start live stroke display
+        if self.has_display:
+            try:
+                self.live_display.start()
+            except Exception as e:
+                print(f"⚠️  Display error: {e}")
+                self.has_display = False
+
         print("\n" + "="*60)
         print("CONTROLS:")
         print("  Type 'start' and press Enter to start recording")
@@ -113,7 +131,16 @@ class WorkoutMonitor:
                         if len(self.recent_stroke_lengths) > 5:
                             self.recent_stroke_lengths.pop(0)
                         self.last_stroke_count = current_stroke_count
-                    
+
+                       # Update live display
+                    if self.has_display:
+                        try:
+                            self.live_display.update(data['stroke_length'], current_stroke_count)
+                            self.live_display.process_events()
+                        except:
+                            self.has_display = False
+
+
                     # Calculate 5-stroke average
                     if len(self.recent_stroke_lengths) > 0:
                         avg_5_strokes = sum(self.recent_stroke_lengths) / len(self.recent_stroke_lengths)
@@ -141,6 +168,8 @@ class WorkoutMonitor:
                 self.recorder.stop_recording()
         finally:
             self.running = False
+            if self.has_display and self.live_display:
+                self.live_display.stop()
 
 
 def main():
