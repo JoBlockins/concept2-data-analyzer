@@ -30,7 +30,7 @@ class PM5Connection:
             # Connect to the first erg found
             self.erg = pyrow.pyrow(ergs[0])
             self.connected = True
-            print(f"Successfully connected to PM5!")
+            print("Successfully connected to PM5!")
             return True
             
         except Exception as e:
@@ -42,8 +42,6 @@ class PM5Connection:
         """Safely disconnect from the PM5"""
         if self.erg:
             try:
-                # PyRow doesn't have an explicit close method
-                # but we can clean up our reference
                 self.erg = None
                 self.connected = False
                 print("Disconnected from PM5")
@@ -62,25 +60,24 @@ class PM5Connection:
         try:
             # Get current monitor status
             monitor = self.erg.get_monitor()
-
+            
             distance = monitor.get('distance', 0)
-            stroke_count = monitor.get('strokes', 0)  # PyRow might use 'strokes' field
+            stroke_count = monitor.get('strokes', 0)
             
             # Calculate stroke length
             stroke_length = distance / stroke_count if stroke_count > 0 else 0
             
-            
             # Return the data as a dictionary
             return {
                 'time': monitor.get('time', 0),
-                'distance': monitor.get('distance', 0),
-                'stroke_rate': monitor.get('spm', 0),  # strokes per minute
-                'pace': monitor.get('pace', 0),  # seconds per 500m
-                'power': monitor.get('power', 0),  # watts
+                'distance': distance,
+                'stroke_rate': monitor.get('spm', 0),
+                'pace': monitor.get('pace', 0),
+                'power': monitor.get('power', 0),
                 'calories': monitor.get('calories', 0),
                 'heart_rate': monitor.get('heartrate', 0),
-                'stroke_count': 0  # PyRow might not have this, set to 0
-                'stroke_length': round(stroke_length, 2) 
+                'stroke_count': stroke_count,
+                'stroke_length': round(stroke_length, 2)
             }
             
         except Exception as e:

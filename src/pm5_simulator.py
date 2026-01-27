@@ -89,10 +89,9 @@ class PM5Simulator:
             
             # Simulated heart rate
             heart_rate = 145 + random.randint(-5, 5)
-
-            # Calculate stroke length (distance per stroke)
-            stroke_length = self.total_distance / self.stroke_count if self.stroke_count > 0 else 0
         
+        # Calculate stroke length (distance per stroke)
+        stroke_length = self.total_distance / self.stroke_count if self.stroke_count > 0 else 0
         
         return {
             'time': round(self.workout_time, 1),
@@ -102,10 +101,10 @@ class PM5Simulator:
             'power': round(power, 1),
             'calories': round(calories, 1),
             'heart_rate': heart_rate,
-            'stroke_count': self.stroke_count
+            'stroke_count': self.stroke_count,
             'stroke_length': round(stroke_length, 2)
         }
- 
+    
     def get_status(self) -> str:
         """Return simulated status"""
         if self.is_rowing:
