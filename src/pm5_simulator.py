@@ -19,8 +19,8 @@ class PM5Simulator:
         self.is_rowing = False
         
         # Realistic rowing parameters
-        self.target_spm = 24  # strokes per minute
-        self.target_pace = 120  # 2:00/500m split
+        self.target_spm = 35  # strokes per minute
+        self.target_pace = 100  # 2:00/500m split
         self.last_stroke_time = 0
     
     def connect(self) -> bool:
@@ -72,11 +72,11 @@ class PM5Simulator:
                 self.last_stroke_time = current_time
                 
                 # Add distance for this stroke (realistic values)
-                meters_per_stroke = 10 + random.uniform(-1, 1)
+                meters_per_stroke = 1.4 + random.uniform(-0.1, 0.15)
                 self.total_distance += meters_per_stroke
             
             # Calculate metrics with realistic variation
-            current_spm = self.target_spm + random.uniform(-2, 2)
+            current_spm = self.target_spm + random.uniform(-3, 5)
             current_pace = self.target_pace + random.uniform(-5, 5)
             
             # Calculate power (watts) from pace
@@ -88,7 +88,7 @@ class PM5Simulator:
             calories = (self.workout_time / 3600) * (power * 4)
             
             # Simulated heart rate
-            heart_rate = 145 + random.randint(-5, 5)
+            heart_rate = 175 + random.randint(-15, 15)
         
         # Calculate stroke length (distance per stroke)
         stroke_length = self.total_distance / self.stroke_count if self.stroke_count > 0 else 0
