@@ -19,6 +19,8 @@ class WorkoutMonitor:
         self.recording = False
         self.running = True
         self.command = None
+        self.recent_stroke_lengths = []  # Track last 5 strokes
+        self.last_stroke_count = 0
     
     def input_thread(self):
         """Separate thread to handle user input"""
@@ -102,16 +104,33 @@ class WorkoutMonitor:
                     if self.recording:
                         self.recorder.record_data(data)
                     
-                    # Display current metrics
+                    # Track stroke length changes
+                    current_stroke_count = data.get('stroke_count', 0)
+                    if current_stroke_count > self.last_stroke_count:
+                        # New stroke detected
+                        self.recent_stroke_lengths.append(data['stroke_length'])
+                        # Keep only last 5 strokes
+                        if len(self.recent_stroke_lengths) > 5:
+                            self.recent_stroke_lengths.pop(0)
+                        self.last_stroke_count = current_stroke_count
+                    
+                    # Calculate 5-stroke average
+                    if len(self.recent_stroke_lengths) > 0:
+                        avg_5_strokes = sum(self.recent_stroke_lengths) / len(self.recent_stroke_lengths)
+                    else:
+                        avg_5_strokes = 0
+                    
+                    # Display current metrics with stroke length tracking
                     status = "🔴 REC" if self.recording else "⚪️    "
                     print(f"{status} | "
                           f"Time: {data['time']:6.1f}s | "
                           f"Dist: {data['distance']:6.0f}m | "
                           f"SPM: {data['stroke_rate']:5.1f} | "
-                          f"DPS: {data['stroke_length']:5.2f}m | "
+                          f"Current DPS: {data['stroke_length']:5.2f}m | "
+                          f"Avg(5): {avg_5_strokes:5.2f}m | "
                           f"Pace: {data['pace']:5.1f} | "
-                          f"Power: {data['power']:6.1f}W", end='\r')
-                
+                          f"Power: {data['power']:6.1f}W", end='\r')                
+
                 # Wait before next reading
                 time.sleep(0.5)
                 
