@@ -46,3 +46,54 @@ Current Phase: Initial setup and PM5 connection development
 
 ## License
 MIT License - See LICENSE file for details
+
+## Development Notes
+
+### Current Status (January 26, 2026)
+✅ **Completed Features:**
+- PM5 USB connection module
+- Data simulator for testing without hardware
+- Real-time data monitoring with live display
+- Interactive recording (start/stop commands)
+- Stroke length calculation and tracking (custom metric not in Concept2 app)
+- Post-workout analysis with detailed statistics
+- 500m split analysis
+- CSV data export
+- All modules tested and working in simulation mode
+
+🔜 **Next Steps (After Wednesday when USB cable arrives):**
+- Test with real PM5 hardware
+- Verify stroke length accuracy with actual erg
+- May need to adjust PyRow field names based on real PM5 data
+
+💡 **Future Enhancements:**
+- Data visualization (graphs of stroke length, pace, power over time)
+- Compare multiple workouts
+- Enhanced GUI with buttons and live graphs
+- Interval workout simulator
+- Export to other formats (Excel, Google Sheets)
+
+### Testing the Application
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Run with simulator
+python3 src/main.py --simulate
+
+# Commands:
+#   Type 'start' + Enter to begin recording
+#   Type 'stop' + Enter to stop and see analysis
+#   Type 'quit' + Enter to exit
+
+# When cable arrives Wednesday, test with real PM5:
+python3 src/main.py
+```
+
+### Project Structure
+- `src/pm5_connection.py` - Real PM5 USB connection
+- `src/pm5_simulator.py` - Simulated data for testing
+- `src/data_recorder.py` - Records workout data to CSV
+- `src/data_analyzer.py` - Calculates statistics and splits
+- `src/main.py` - Main application with interactive controls
+- `data/` - Saved workout CSV files (not committed to git)
