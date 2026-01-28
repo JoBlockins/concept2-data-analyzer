@@ -3,8 +3,23 @@ PM5 Connection Module
 Handles USB connection to Concept2 PM5 monitor
 """
 
-import pyrow
 from typing import Optional, Dict, Any
+
+# Set up USB backend BEFORE importing pyrow
+import usb.core
+import usb.backend.libusb1
+
+# Initialize libusb backend for Mac
+_backend = usb.backend.libusb1.get_backend(
+    find_library=lambda x: "/opt/homebrew/lib/libusb-1.0.dylib"
+)
+
+# Set it as the default backend
+import os
+os.environ['PYUSB_DEBUG'] = 'debug'
+
+# Now import pyrow
+import pyrow.pyrow as pyrow
 
 
 class PM5Connection:
@@ -13,6 +28,7 @@ class PM5Connection:
     def __init__(self):
         self.erg = None
         self.connected = False
+        self.backend = _backend
     
     def connect(self) -> bool:
         """
@@ -20,21 +36,30 @@ class PM5Connection:
         Returns True if successful, False otherwise
         """
         try:
-            # Find all connected ergs
-            ergs = list(pyrow.find())
+            # Find USB devices with our backend
+            devices = list(usb.core.find(find_all=True, backend=self.backend))
+            print(f"Found {len(devices)} USB devices")
             
-            if not ergs:
+            # Look for Concept2 device (vendor ID 0x17a4)
+            c2_devices = [d for d in devices if d.idVendor == 0x17a4]
+            
+            if not c2_devices:
                 print("No PM5 monitors found. Please check USB connection.")
+                print("Make sure the PM5 is powered on.")
                 return False
             
-            # Connect to the first erg found
-            self.erg = pyrow.pyrow(ergs[0])
+            print(f"Found {len(c2_devices)} Concept2 device(s)")
+            
+            # Connect using PyRow
+            self.erg = pyrow.PyErg(c2_devices[0])
             self.connected = True
             print("Successfully connected to PM5!")
             return True
             
         except Exception as e:
             print(f"Error connecting to PM5: {e}")
+            import traceback
+            traceback.print_exc()
             self.connected = False
             return False
     
